@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Exploring intents</string>
+    <string name="explicit_intent">Explicit Intent</string>
+    <string name="implicit_intent_action">Implicit Intent + Action</string>
+    <string name="implicit_intent_action_and_category">Implicit Intent + Action + Category</string>
+    <string name="open_page">Open Page</string>
+    <string name="make_a_call">Make a call</string>
+    <string name="create_alarm">Create Alarm</string>
+
+</resources>
