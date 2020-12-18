@@ -6,5 +6,7 @@
     <string name="open_page">Open Page</string>
     <string name="make_a_call">Make a call</string>
     <string name="create_alarm">Create Alarm</string>
+    <string name="go_to_main_activity">Go To MainActivity</string>
+    <string name="name">Name</string>
 
 </resources>
