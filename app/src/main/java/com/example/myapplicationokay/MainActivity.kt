@@ -2,6 +2,8 @@ package com.example.myapplicationokay
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,12 +11,15 @@ import android.content.Intent
 import android.content.Intent.*
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.AlarmClock
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -24,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         alarmManagerExample()
+        alarmManagerWithNotification()
 
         setupPermissions()
 
@@ -94,15 +100,34 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun alarmManagerExample(){
-        val alarmManager =  getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+    fun alarmManagerExample() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as? AlarmManager
         val intent = Intent(this, MyReceiver::class.java)
 
-        val pendingIntent = PendingIntent.getBroadcast(this,
-            1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            1, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
-        alarmManager?.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            2*60*1000, pendingIntent)
+        alarmManager?.setExactAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            2 * 60 * 1000, pendingIntent
+        )
+    }
+
+    fun alarmManagerWithNotification() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        val intent = Intent(this, MyReceiver2::class.java)
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            1, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        alarmManager?.setExactAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            10* 1000, pendingIntent
+        )
     }
 
     private fun setupPermissions() {
@@ -127,6 +152,42 @@ class MainActivity : AppCompatActivity() {
 
 class MyReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        Toast.makeText(context,"O Alarme foi executado!", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "O Alarme foi executado!", Toast.LENGTH_LONG).show()
     }
 }
+
+class MyReceiver2 : BroadcastReceiver() {
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val intent = Intent(context, MainActivity2::class.java).apply {
+            flags = FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+
+        val builder = NotificationCompat.Builder(context!!, "2")
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setContentTitle("Minha Notificação")
+            .setContentText("Alarme agendado após 10 segundos")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        val not = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            val channel = NotificationChannel(
+                "2", "Channel 1",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channel.description = "Descricao"
+            not.createNotificationChannel(channel)
+
+        }
+        with(NotificationManagerCompat.from(context))
+        {
+            notify(2, builder.build())
+        }
+    }
+}
+
+
